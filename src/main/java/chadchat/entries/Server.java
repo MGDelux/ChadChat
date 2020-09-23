@@ -1,53 +1,42 @@
 package chadchat.entries;
 
-import chadchat.domain.User;
-
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.ArrayList;
 
 public class Server {
-    // The entry point of the ChatChad server
+    private static final int PORT = 3600;
+    private static Socket client;
+    public static ArrayList<String> Clients = new ArrayList<>();
+    public static ArrayList<ClientHandler> clientHandlers = new ArrayList<>();
 
-    // JDBC driver name and database URL
-    static final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
-    static final String DB_URL = "jdbc:mysql://localhost/chadchat";
-
-    //  Database credentials
-    static final String USER = "youruser";
-    static final String PASS = "thepassword";
-
-    /**
-     * This is purely a data base test. Given that you have created a
-     * users table in chatchad with an id and name.
-     *
-     * @throws ClassNotFoundException
-     * @throws SQLException
-     */
-    private static void dbTest() throws ClassNotFoundException, SQLException {
-        Class.forName(JDBC_DRIVER);
-        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS)) {
-            var stmt = conn.createStatement();
-            String sql;
-            sql = "SELECT id, name FROM users";
-            ResultSet rs = stmt.executeQuery(sql);
-            while (rs.next()) {
-                User user = new User(
-                        rs.getInt("id"),
-                        rs.getString("name"));
-                System.out.println(user);
+    public static void main(String[] args) {
+        try {
+            ServerSocket sever = new ServerSocket(PORT);
+            System.out.println("[SERVER] Started on port " + PORT);
+            while (true) {
+                client = sever.accept();
+                System.out.println("[SERVER] client joined");
+                ClientHandler clientHandler = new ClientHandler(client, clientHandlers);
+                clientHandlers.add(clientHandler);
+                Thread t = new Thread(clientHandler);
+                t.start();
             }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
+    public  static boolean addUser(String user) {
+        if (Clients.contains(user)) {
+            System.out.println("excist");
+            return true;
+        } else {
+            Clients.add(user);
+            System.out.println("added");
+            return false;
 
-    public static void main(String[] args) throws SQLException, ClassNotFoundException {
-        // Remove this soon
-        dbTest();
+        }
     }
-
-
-
-
 }

@@ -72,7 +72,7 @@
                         <manifest>
                             <addClasspath>true</addClasspath>
                             <mainClass>
-                                chadchat.entries.Server
+                                chadchat.entries.DBServer
                             </mainClass>
                         </manifest>
                     </archive>
