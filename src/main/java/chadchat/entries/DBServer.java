@@ -2,10 +2,7 @@ package chadchat.entries;
 
 import chadchat.domain.User;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 
 public class DBServer {
     // The entry point of the ChatChad server
@@ -25,9 +22,9 @@ public class DBServer {
      * @throws ClassNotFoundException
      * @throws SQLException
      */
-    private static void dbTest() throws ClassNotFoundException, SQLException {
+    public static String dbTest(String userclientUsername) throws ClassNotFoundException, SQLException {
         Class.forName(JDBC_DRIVER);
-        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS)) {
+        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS)) {  // FIX BAD METHODE FOR CONNECTING
             var stmt = conn.createStatement();
             String sql;
             sql = "SELECT id, name FROM users";
@@ -37,17 +34,35 @@ public class DBServer {
                         rs.getInt("id"),
                         rs.getString("name"));
                 System.out.println(user);
+                if (user.getName().equals(userclientUsername)) {
+                    return user.getName();
+                }
             }
+        }
+        return null;
+    }
+
+
+    public static void setUser(User user) throws ClassNotFoundException, SQLException {
+        Class.forName(JDBC_DRIVER);
+        try {
+            try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS)) {
+                // FIX BAD METHODE FOR CONNECTING
+                String q = "INSERT INTO chadchat.users (name) " + " values (?)";
+                PreparedStatement preparedStatement = conn.prepareStatement(q);
+                preparedStatement.setString(1, user.toString());
+                preparedStatement.execute();
+                conn.close();
+                System.out.println("DB ADDED " + user);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
 
     public static void main(String[] args) throws SQLException, ClassNotFoundException {
-        // Remove this soon
-        dbTest();
     }
-
-
 
 
 }

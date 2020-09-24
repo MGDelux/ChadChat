@@ -13,5 +13,14 @@ public class User {
     public String toString() {
         return  name;
 
+
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
     }
 }
