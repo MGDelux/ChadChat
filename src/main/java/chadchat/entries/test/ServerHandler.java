@@ -1,4 +1,4 @@
-package chadchat.entries;
+package chadchat.entries.test;
 
 import java.io.BufferedReader;
 import java.io.IOException;

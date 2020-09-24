@@ -1,52 +1,53 @@
 package chadchat.entries;
 
-import java.io.BufferedReader;
+import chadchat.domain.User;
+
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.ArrayList;
+import java.util.Scanner;
+import java.util.Set;
 
 public class ClientHandler extends Thread {
-    private final BufferedReader in;
-    private final PrintWriter out;
-    private final ArrayList<ClientHandler> clients;
-    private String localClientUsername = null;
+    private Set<User> players;
+    private Socket socket;
+    private ChatServer server;
+    private Scanner in;
+    private PrintWriter out;
+    private String clientUsername = "";
 
-    public ClientHandler(Socket client, ArrayList<ClientHandler> clients) throws IOException {
-        this.in = new BufferedReader(new InputStreamReader(client.getInputStream()));
-        this.out = new PrintWriter(client.getOutputStream(), true);
-        this.clients = clients;
+
+    public ClientHandler(Socket client, ChatServer server) throws IOException {
+        this.socket = client;
+        this.server = server;
+        in = new Scanner(new InputStreamReader(socket.getInputStream()));
+        out = new PrintWriter(socket.getOutputStream(), true);
     }
 
     @Override
     public void run() {
-        out.println("Welcome");
         try {
-            out.println("What is your username? ");
-            String username = in.readLine();
-            if (Server.addUser(username) || username.isEmpty()) {
-                out.println("FEJL");
-                run();
-            }
-            localClientUsername = username;
-            while (true) {
-                String userInput = in.readLine();
-                int space = userInput.indexOf(" ");
-                if (userInput.startsWith("say")) { //player broadcast msg
-                    if (space != -1) {
-                        bounceBack(userInput.substring(space + 1));
-                    }
-                }
-            }
-        } catch (IOException e) {
+            setClientUsername();
+            out.println("Please chose a channel to connect to:");
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public void bounceBack(String msg) {
-        for (ClientHandler clientHandler : clients) {
-            clientHandler.out.println("[SERVER] " + localClientUsername + " " + msg);
-        }
+    public void setClientUsername() {
+        out.println("Hello and welcome please enter your Username:");
+        System.out.println("[SERVER] . . . ");
+        clientUsername = in.nextLine();
+        out.println("Welcome user " + clientUsername);
+        System.out.println("[SERVER] Adding user " + clientUsername);
+        User newUser = new User(server.tempAutoI(), clientUsername);
+        server.setActiveUsers(newUser);
+        out.println("ONLINE USERS: " + server.activeUsers.toString()); //fix lol
+    }
+
+    public Set<User> getPlayersInLobby() { //gets players on server
+        players = server.getActiveUsers();
+        return players;
     }
 }

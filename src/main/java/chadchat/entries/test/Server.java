@@ -1,4 +1,6 @@
-package chadchat.entries;
+package chadchat.entries.test;
+
+import chadchat.entries.ClientHandler;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -17,18 +19,18 @@ public class Server {
             System.out.println("[SERVER] Started on port " + PORT);
             while (true) {
                 client = sever.accept();
-                System.out.println("[SERVER] client joined");
-                ClientHandler clientHandler = new ClientHandler(client, clientHandlers);
-                clientHandlers.add(clientHandler);
-                Thread t = new Thread(clientHandler);
-                t.start();
+                System.out.println("[SERVER] client connected");
+              //  ClientHandler clientHandler = new ClientHandler(client, clientHandlers);
+                //clientHandlers.add(clientHandler);
+                //read t = new Thread(clientHandler);
+               // t.start();
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public  static boolean addUser(String user) {
+    public static boolean addUser(String user) {
         if (Clients.contains(user)) {
             System.out.println("excist");
             return true;
