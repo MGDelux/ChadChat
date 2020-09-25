@@ -7,11 +7,10 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class ChatServer {
-    public ArrayList<User> channel1 = new ArrayList<>();
-    public ArrayList<User> channel2 = new ArrayList<>(); // make seperate class if it works lmao
     private final int PORT = 3400;
     private ServerSocket serverSocket;
     private final ArrayList<Socket> clients;
@@ -21,17 +20,9 @@ public class ChatServer {
     Log log = new Log();
     PrintWriter out;
 
-    public ArrayList<User> getChannel1() {
-        return channel1;
-    }
-
-    public ArrayList<User> getChannel2() {
-        return channel2;
-    }
 
     public ChatServer() {
         try {
-
             serverSocket = new ServerSocket(PORT);
         } catch (IOException e) {
             System.out.println(Arrays.toString(e.getStackTrace()));
@@ -57,24 +48,27 @@ public class ChatServer {
             if (!client.isClosed()) {
                 out = new PrintWriter(client.getOutputStream(), true);
                 out.println(serverLabel + " : " + msg);
-                out.flush();
             }
         }
     }
 
     public synchronized void sendMsgTest(String userName, String msg) throws IOException {
         for (Socket client : clients) {
-            LocalTime localTime = LocalTime.now();
+            String localTime = LocalTime.now().format(DateTimeFormatter.ofPattern("hh:mm"));
             if (!client.isClosed() || userName.isEmpty()) {
                 out = new PrintWriter(client.getOutputStream(), true);
                 out.println(localTime + " " + userName + " : " + msg);
                 log.log(userName + "send: " + msg);
-                if (latestChatMsg.size() > 20){
-                    latestChatMsg.remove(1);
-                }else {
-                    latestChatMsg.add(localTime + " " + userName + " : " + msg);
-                }
+                lastTenMessages(localTime,userName,msg);
             }
+        }
+    }
+
+    public synchronized void lastTenMessages(String localTime, String userName, String message) throws IOException {
+        if (latestChatMsg.size() > 11) {
+            latestChatMsg.remove(1);
+        } else {
+            latestChatMsg.add(localTime + " " + userName + " : " + message);
         }
     }
 
@@ -91,7 +85,7 @@ public class ChatServer {
         }
     }
 
-    public boolean removePlayer(User player) {
+    public boolean removeInactiveUser(User player) {
         if (activeUsers.contains(player)) {
             activeUsers.remove(player);
             log.log("removed: " + player);
