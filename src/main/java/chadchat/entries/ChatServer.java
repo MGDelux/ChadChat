@@ -85,10 +85,10 @@ public class ChatServer {
         }
     }
 
-    public boolean removeInactiveUser(User player) {
-        if (activeUsers.contains(player)) {
-            activeUsers.remove(player);
-            log.log("removed: " + player);
+    public boolean removeInactiveUser(String userName) {
+        if (activeUsers.contains(userName)) {
+            activeUsers.remove(userName);
+            log.log("removed: " + userName);
             return true;
         } else {
             return false;
@@ -96,8 +96,12 @@ public class ChatServer {
     }
 
 
-    public Set<User> getActiveUsers() {
-        return activeUsers;
+    public boolean getActiveUsers(String userName) {
+        for (User u: activeUsers){
+            if (u.getName().contains(userName)){
+                return true;
+            }else return false;
+        }return false;
     }
 
     public int tempAutoI() { //update later for db info

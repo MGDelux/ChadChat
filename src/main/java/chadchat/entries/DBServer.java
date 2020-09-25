@@ -43,14 +43,15 @@ public class DBServer {
     }
 
 
-    public static void setUser(User user) throws ClassNotFoundException, SQLException {
+    public static void setUser(String user) throws ClassNotFoundException, SQLException {
+        System.out.println(user);
         Class.forName(JDBC_DRIVER);
         try {
             try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS)) {
                 // FIX BAD METHODE FOR CONNECTING
                 String q = "INSERT INTO chadchat.users (name) " + " values (?)";
                 PreparedStatement preparedStatement = conn.prepareStatement(q);
-                preparedStatement.setString(1, user.toString());
+                preparedStatement.setString(1, user);
                 preparedStatement.execute();
                 conn.close();
                 System.out.println("DB ADDED " + user);

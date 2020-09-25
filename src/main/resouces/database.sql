@@ -12,5 +12,5 @@ create table chatlog(
     time timestamp not null default (now()),
     user_id int not null,
     message VARCHAR(255) not null,
-    foreign key (time) references users (id)
+    foreign key (user_id) references users (id)
 );

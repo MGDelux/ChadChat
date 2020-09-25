@@ -32,7 +32,7 @@ public class Protocol extends Thread {
     public void run() {
         try {
             out.println("Welcome " + user.getName());
-            clientHandler.outLatestChatMsgs();
+           // clientHandler.outLatestChatMsgs();
             String cmd = getInput();
             while (!cmd.equals("dc")) {
                 switch (cmd) {
@@ -66,7 +66,7 @@ public class Protocol extends Thread {
     }
 
     private void sendmesgTest(String name, String a_msg) throws IOException {
-       clientHandler.test(name,a_msg);
+     //  clientHandler.test(name,a_msg);
     }
 }
 
