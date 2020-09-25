@@ -39,7 +39,7 @@ public class DBServer {
                 }
             }
         }
-        return "TEST";
+        return "null";
     }
 
 

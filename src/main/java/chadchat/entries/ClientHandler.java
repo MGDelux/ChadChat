@@ -23,7 +23,7 @@ public class ClientHandler extends Thread {
     public ClientHandler(Socket client, ChatServer server) throws IOException {
         this.socket = client;
         this.server = server;
-        in = new Scanner(new InputStreamReader(socket.getInputStream()));
+        in = new Scanner(new InputStreamReader(socket.getInputStream(), "UTF-8"));
         out = new PrintWriter(socket.getOutputStream(), true);
     }
 
@@ -35,19 +35,19 @@ public class ClientHandler extends Thread {
     public void run() {
         try {
             setClientUsername();
-            Protocol p = new Protocol(this.newUser, in, out,this);
+            Protocol p = new Protocol(this.newUser, in, out, this);
             p.run();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-     public void outLatestChatMsgs() {
+    public void outLatestChatMsgs() {
         try {
             for (String s : server.latestChatMsg) {
                 out.println(s);
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -60,24 +60,27 @@ public class ClientHandler extends Thread {
             out.println("is it you? 1. yes - 2. no --");
             int inP = in.nextInt();
             if (inP == 2) {
-                //do something
                 out.println("Welcome new user");
+                System.out.println("[SERVER] Adding user " + clientUsername);
+                newUser = new User(server.tempAutoI(), clientUsername);
             } else {
-                out.println("Welcome back");
+                for (User u : server.activeUsers) {
+                    if (u.getName().equals(clientUsername)) {
+                        newUser =  u; //fix
+                        out.println(u);
+                    }
+                    out.println("Welcome back");
+                }
             }
         }
-        out.println("Welcome user " + clientUsername);
-        System.out.println("[SERVER] Adding user " + clientUsername);
-        newUser = new User(server.tempAutoI(), clientUsername);
         server.setActiveUsers(newUser);
         out.println("ONLINE USERS: " + server.activeUsers.toString()); //fix lol
         server.sendServerNotification(clientUsername + " Has joined the chat");
-      //  DBServer.setUser(newUser);
+        DBServer.setUser(newUser);
     }
 
     private String checkIfNewUser(String clientUsername) throws SQLException, ClassNotFoundException {
-      //  return DBServer.dbTest(clientUsername);
-        return "null";
+        return DBServer.dbTest(clientUsername);
 
     }
 
@@ -89,4 +92,6 @@ public class ClientHandler extends Thread {
     public synchronized void test(String clientUsername, String msg) throws IOException { //CHange
         server.sendMsgTest(clientUsername, msg);
     }
+
+    
 }

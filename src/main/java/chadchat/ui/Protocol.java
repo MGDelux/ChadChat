@@ -9,6 +9,7 @@ import java.io.PrintWriter;
 import java.util.Scanner;
 
 public class Protocol extends Thread {
+    private boolean inChatChannel = false;
     private final User user;
     private final Scanner in;
     private final PrintWriter out;
@@ -39,12 +40,18 @@ public class Protocol extends Thread {
                         out.println("Help command infrom user bla bla");
                         break;
                     case "chat":
-                        while (true) {
-                            out.print(">");
-                            String a_msg = in.nextLine();
-                            sendmesgTest(this.user.getName(), a_msg);
+                        if (inChatChannel) {
+                            while (inChatChannel) {
+                                out.print(">");
+                                String a_msg = in.nextLine();
+                                sendmesgTest(this.user.getName(), a_msg);
+                            }
+                        }
+                        else {
+                            out.println("You need to chose a channel to join.");
                         }
                     case "channels":
+                        out.println("Currently in a channel : " +inChatChannel);
                         break;
                     default:
                         out.println("UNKOWN COMMAND " + cmd);

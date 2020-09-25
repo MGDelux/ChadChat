@@ -10,6 +10,8 @@ import java.time.LocalTime;
 import java.util.*;
 
 public class ChatServer {
+    public ArrayList<User> channel1 = new ArrayList<>();
+    public ArrayList<User> channel2 = new ArrayList<>(); // make seperate class if it works lmao
     private final int PORT = 3400;
     private ServerSocket serverSocket;
     private final ArrayList<Socket> clients;
@@ -18,6 +20,14 @@ public class ChatServer {
     public ArrayList<String> latestChatMsg = new ArrayList<>();
     Log log = new Log();
     PrintWriter out;
+
+    public ArrayList<User> getChannel1() {
+        return channel1;
+    }
+
+    public ArrayList<User> getChannel2() {
+        return channel2;
+    }
 
     public ChatServer() {
         try {
