@@ -39,7 +39,7 @@ public class Migrate {
             System.out.println("Migration file, does not exist: " + migrationFile);
             throw new FileNotFoundException(migrationFile);
         }
-        try(Connection conn = Database.getConnection()) {
+        try (Connection conn = Database.getConnection()) {
             conn.setAutoCommit(false);
             ScriptRunner runner = new ScriptRunner(conn);
             runner.setStopOnError(true);

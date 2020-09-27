@@ -35,19 +35,19 @@ public class ClientHandler extends Thread {
     public void run() {
         try {
             setClientUsername();
-            Protocol p = new Protocol(this.newUser, in, out,this);
+            Protocol p = new Protocol(this.newUser, in, out, this);
             p.run();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-     public void outLatestChatMsgs() {
+    public void outLatestChatMsgs() {
         try {
             for (String s : server.latestChatMsg) {
                 out.println(s);
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -72,11 +72,11 @@ public class ClientHandler extends Thread {
         server.setActiveUsers(newUser);
         out.println("ONLINE USERS: " + server.activeUsers.toString()); //fix lol
         server.sendServerNotification(clientUsername + " Has joined the chat");
-      //  DBServer.setUser(newUser);
+        //  DBServer.setUser(newUser);
     }
 
     private String checkIfNewUser(String clientUsername) throws SQLException, ClassNotFoundException {
-      //  return DBServer.dbTest(clientUsername);
+        //  return DBServer.dbTest(clientUsername);
         return "null";
 
     }

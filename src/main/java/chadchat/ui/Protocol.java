@@ -30,13 +30,13 @@ public class Protocol extends Thread {
     @Override
     public void run() {
         try {
-            out.println("Welcome " + user.getName());
+            out.println(welcomeMessage());
             clientHandler.outLatestChatMsgs();
             String cmd = getInput();
             while (!cmd.equals("dc")) {
                 switch (cmd) {
                     case "h":
-                        out.println("Help command infrom user bla bla");
+                        out.println(helpMessage());
                         break;
                     case "chat":
                         while (true) {
@@ -61,5 +61,21 @@ public class Protocol extends Thread {
     private void sendmesgTest(String name, String a_msg) throws IOException {
        clientHandler.test(name,a_msg);
     }
+
+    private String welcomeMessage(){
+        return "Welcome " + user.getName()
+                + "\nPlease select a chat or pick a channel by typing the name or type help for more info";
+    }
+
+    private String helpMessage(){
+        return "This is a help message!";
+    }
+
+    /*
+    private String channelMessage(){
+        return "You've joined " + channel.getName();
+    }
+     */
+
 }
 
