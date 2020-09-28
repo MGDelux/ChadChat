@@ -1,7 +1,6 @@
 package chadchat.ui;
 
 import chadchat.domain.User;
-import chadchat.entries.ChatServer;
 import chadchat.entries.ClientHandler;
 
 import java.io.IOException;
@@ -42,7 +41,7 @@ public class Protocol extends Thread {
                         while (true) {
                             out.print(">");
                             String a_msg = in.nextLine();
-                            sendmesgTest(this.user.getName(), a_msg);
+
                         }
                     case "channels":
                         break;
@@ -66,8 +65,9 @@ public class Protocol extends Thread {
     }
 
     private String welcomeMessage(){
-        return "Welcome " + user.getName()
-                + "\nPlease select chat or pick a channel by typing the name or type help for more info";
+    //    return "Welcome " + user.getName()
+      //          + "\nPlease select chat or pick a channel by typing the name or type help for more info";
+        return "hej";
     }
 
     private String helpMessage(){

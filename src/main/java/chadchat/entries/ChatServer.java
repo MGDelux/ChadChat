@@ -1,6 +1,9 @@
 package chadchat.entries;
 
+import chadchat.api.chadchat;
 import chadchat.domain.User;
+import chadchat.domain.UserRepo;
+import chadchat.infrastructure.Database;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -16,18 +19,36 @@ public class ChatServer {
     private final ArrayList<Socket> clients;
     public final String serverLabel = "[SERVER]";
     public Set<User> activeUsers = new HashSet<>();
+    Iterable<User> allChatUsers;
     public ArrayList<String> latestChatMsg = new ArrayList<>();
     Log log = new Log();
+    Database db = new Database();
+
     PrintWriter out;
 
 
     public ChatServer() {
         try {
             serverSocket = new ServerSocket(PORT);
+            InitializeDatabase();
         } catch (IOException e) {
             System.out.println(Arrays.toString(e.getStackTrace()));
         }
         clients = new ArrayList<>();
+    }
+
+    private void InitializeDatabase() {
+        log.dblog("getting database..");
+        log.dblog("Getting info from DB");
+        try {
+          //idk if this work lol
+        allChatUsers =  db.getAllUsers();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+        log.dblog("All users gathered from DB");
+
     }
 
     public void startServer() throws IOException {
@@ -36,7 +57,8 @@ public class ChatServer {
             Socket client = serverSocket.accept();
             clients.add(client);
             log.log("client count: " + clients.size());
-            ClientHandler clientHandler = new ClientHandler(client, this);
+            chadchat chat = new chadchat((UserRepo) db);
+            ClientHandler clientHandler = new ClientHandler(chat, client, this);
             Thread t = new Thread(clientHandler);
             t.start();
         }
@@ -96,13 +118,6 @@ public class ChatServer {
     }
 
 
-    public boolean getActiveUsers(String userName) {
-        for (User u: activeUsers){
-            if (u.getName().contains(userName)){
-                return true;
-            }else return false;
-        }return false;
-    }
 
     public int tempAutoI() { //update later for db info
         if (activeUsers.size() == 0) {

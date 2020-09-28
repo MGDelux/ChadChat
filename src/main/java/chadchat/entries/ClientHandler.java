@@ -1,5 +1,7 @@
 package chadchat.entries;
 
+import chadchat.api.InvalidPassword;
+import chadchat.api.chadchat;
 import chadchat.domain.User;
 import chadchat.ui.Protocol;
 
@@ -12,6 +14,7 @@ import java.util.Scanner;
 import java.util.Set;
 
 public class ClientHandler extends Thread {
+    private final chadchat.api.chadchat chadchat;
     private Set<User> players;
     private Socket socket;
     private ChatServer server;
@@ -20,7 +23,8 @@ public class ClientHandler extends Thread {
     private String clientUsername;
     private User newUser;
 
-    public ClientHandler(Socket client, ChatServer server) throws IOException {
+    public ClientHandler(chadchat.api.chadchat chadchat, Socket client, ChatServer server) throws IOException {
+        this.chadchat = chadchat;
         this.socket = client;
         this.server = server;
         in = new Scanner(new InputStreamReader(socket.getInputStream()));
@@ -34,7 +38,7 @@ public class ClientHandler extends Thread {
     @Override
     public void run() {
         try {
-            setClientUsername();
+            login();
             Protocol p = new Protocol(this.newUser, in, out, this);
             p.run();
         } catch (Exception e) {
@@ -52,27 +56,20 @@ public class ClientHandler extends Thread {
         }
     }
 
-    public void setClientUsername() throws IOException, SQLException, ClassNotFoundException {
-        out.println("Hello and welcome please enter your Username:");
-        clientUsername = in.nextLine();
-        if (checkIfNewUser(clientUsername.toLowerCase()).equals(clientUsername.toLowerCase())) {
-            out.println("An user with the name " + clientUsername + " is already an user on this server..");
-            out.println("is it you? 1. yes - 2. no --");
-            int inP = in.nextInt();
-            if (inP == 2) {
-                //do something
-                out.println("Welcome new user");
-            } else {
-                out.println("Welcome back");
-            }
-        }
-        out.println("Welcome user " + clientUsername);
-        System.out.println("[SERVER] Adding user " + clientUsername);
-        newUser = new User(server.tempAutoI(), clientUsername, createdAt, salt, secret);
-        server.setActiveUsers(newUser);
-        out.println("ONLINE USERS: " + server.activeUsers.toString()); //fix lol
-        server.sendServerNotification(clientUsername + " Has joined the chat");
-        //  DBServer.setUser(newUser);
+    public void login() {
+       out.println("Welcome to *CHADCHAT* please login:");
+       out.println("Username:");
+       String username = in.nextLine();
+       out.print("password:");
+       String password = in.nextLine();
+       try {
+           chadchat.login(username,password);
+       } catch (InvalidPassword invalidPassword) {
+           invalidPassword.printStackTrace();
+           out.println("ERROR IN LOGIN");
+           login();
+       }
+       out.println("Welcome "+ username);
     }
 
     private String checkIfNewUser(String clientUsername) throws SQLException, ClassNotFoundException {
@@ -82,7 +79,7 @@ public class ClientHandler extends Thread {
     }
 
     public Set<User> getPlayersInLobby() { //gets players on server
-        players = server.getActiveUsers();
+       // players = server.getActiveUsers();
         return players;
     }
 
