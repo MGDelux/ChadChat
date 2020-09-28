@@ -9,7 +9,6 @@ import java.io.PrintWriter;
 import java.util.Scanner;
 
 public class Protocol extends Thread {
-    private boolean inChatChannel = false;
     private final User user;
     private final Scanner in;
     private final PrintWriter out;
@@ -31,27 +30,24 @@ public class Protocol extends Thread {
     @Override
     public void run() {
         try {
-            out.println("Welcome " + user.getName());
-           // clientHandler.outLatestChatMsgs();
+            out.println(welcomeMessage());
+            clientHandler.outLatestChatMsgs();
             String cmd = getInput();
             while (!cmd.equals("dc")) {
                 switch (cmd) {
                     case "h":
-                        out.println("Help command infrom user bla bla");
+                        out.println(helpMessage());
                         break;
                     case "chat":
-                        if (inChatChannel) {
-                            while (inChatChannel) {
-                                out.print(">");
-                                String a_msg = in.nextLine();
-                                sendmesgTest(this.user.getName(), a_msg);
-                            }
-                        }
-                        else {
-                            out.println("You need to chose a channel to join.");
+                        while (true) {
+                            out.print(">");
+                            String a_msg = in.nextLine();
+                            sendmesgTest(this.user.getName(), a_msg);
                         }
                     case "channels":
-                        out.println("Currently in a channel : " +inChatChannel);
+                        break;
+                    case "show":
+                        out.println("This will reprint commands");
                         break;
                     default:
                         out.println("UNKOWN COMMAND " + cmd);
@@ -66,7 +62,23 @@ public class Protocol extends Thread {
     }
 
     private void sendmesgTest(String name, String a_msg) throws IOException {
-     //  clientHandler.test(name,a_msg);
+       clientHandler.test(name,a_msg);
     }
+
+    private String welcomeMessage(){
+        return "Welcome " + user.getName()
+                + "\nPlease select a chat or pick a channel by typing the name or type help for more info";
+    }
+
+    private String helpMessage(){
+        return "This is a help message!";
+    }
+
+    /*
+    private String channelMessage(){
+        return "You've joined " + channel.getName();
+    }
+     */
+
 }
 

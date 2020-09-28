@@ -5,6 +5,7 @@ import chadchat.domain.User;
 import java.sql.*;
 
 public class DBServer {
+    protected static final String password = "JaHaJe1988";
     // The entry point of the ChatChad server
 
     // JDBC driver name and database URL
@@ -13,7 +14,7 @@ public class DBServer {
 
     //  Database credentials
     static final String USER = "root";
-    static final String PASS = "root";
+    static final String PASS = password;
 
     /**
      * This is purely a data base test. Given that you have created a

@@ -1,7 +1,6 @@
 package chadchat.entries;
 
 import chadchat.domain.User;
-import chadchat.entries.test.Server;
 import chadchat.ui.Protocol;
 
 import java.io.IOException;
@@ -13,6 +12,7 @@ import java.util.Scanner;
 import java.util.Set;
 
 public class ClientHandler extends Thread {
+    private Set<User> players;
     private Socket socket;
     private ChatServer server;
     private Scanner in;
@@ -23,7 +23,7 @@ public class ClientHandler extends Thread {
     public ClientHandler(Socket client, ChatServer server) throws IOException {
         this.socket = client;
         this.server = server;
-        in = new Scanner(new InputStreamReader(socket.getInputStream(), "UTF-8"));
+        in = new Scanner(new InputStreamReader(socket.getInputStream()));
         out = new PrintWriter(socket.getOutputStream(), true);
     }
 
@@ -34,38 +34,59 @@ public class ClientHandler extends Thread {
     @Override
     public void run() {
         try {
-            checkUser();
+            setClientUsername();
             Protocol p = new Protocol(this.newUser, in, out, this);
             p.run();
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            try {
-                if (server.removeInactiveUser(clientUsername)) {
-                    server.removeInactiveUser(clientUsername);
-                }else {
-                    server.log.log("user not found");
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
+        }
+    }
+
+    public void outLatestChatMsgs() {
+        try {
+            for (String s : server.latestChatMsg) {
+                out.println(s);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void setClientUsername() throws IOException, SQLException, ClassNotFoundException {
+        out.println("Hello and welcome please enter your Username:");
+        clientUsername = in.nextLine();
+        if (checkIfNewUser(clientUsername.toLowerCase()).equals(clientUsername.toLowerCase())) {
+            out.println("An user with the name " + clientUsername + " is already an user on this server..");
+            out.println("is it you? 1. yes - 2. no --");
+            int inP = in.nextInt();
+            if (inP == 2) {
+                //do something
+                out.println("Welcome new user");
+            } else {
+                out.println("Welcome back");
             }
         }
+        out.println("Welcome user " + clientUsername);
+        System.out.println("[SERVER] Adding user " + clientUsername);
+        newUser = new User(server.tempAutoI(), clientUsername);
+        server.setActiveUsers(newUser);
+        out.println("ONLINE USERS: " + server.activeUsers.toString()); //fix lol
+        server.sendServerNotification(clientUsername + " Has joined the chat");
+        //  DBServer.setUser(newUser);
     }
 
-    private void checkUser() throws SQLException, ClassNotFoundException, IOException {
-        out.println("What is your username?");
-        clientUsername = in.nextLine();
-        if (server.getActiveUsers(clientUsername)) {
-            out.println("This user already a user of this chat\n  choose an other one loser");
-            checkUser();
-        } else {
-            out.println("Welcome user " + clientUsername + " to the worst chat server on the planet");
-            DBServer.setUser(clientUsername);
-            newUser = new User(server.tempAutoI(), clientUsername);
-            server.setActiveUsers(newUser);
-            server.sendServerNotification(clientUsername + " Has joined the chat");
-        }
+    private String checkIfNewUser(String clientUsername) throws SQLException, ClassNotFoundException {
+        //  return DBServer.dbTest(clientUsername);
+        return "null";
+
     }
 
+    public Set<User> getPlayersInLobby() { //gets players on server
+        players = server.getActiveUsers();
+        return players;
+    }
 
+    public synchronized void test(String clientUsername, String msg) throws IOException { //CHange
+        server.sendMsgTest(clientUsername, msg);
+    }
 }
