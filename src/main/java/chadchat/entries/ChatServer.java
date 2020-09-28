@@ -38,12 +38,11 @@ public class ChatServer {
     }
 
     private void InitializeDatabase() {
-        log.dblog("getting database..");
         log.dblog("Getting info from DB");
         try {
-          //idk if this work lol
-        allChatUsers =  db.getAllUsers();
-        }catch (Exception e){
+            //idk if this work lol
+            allChatUsers = db.getAllUsers();
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -74,6 +73,14 @@ public class ChatServer {
         }
     }
 
+    public Set<User> offlineUsers() {
+        Set<User> tempUserSet = new HashSet<>();
+        for (User u : allChatUsers) {
+            tempUserSet.add(u);
+        }
+        return tempUserSet;
+    }
+
     public synchronized void sendMsgTest(String userName, String msg) throws IOException {
         for (Socket client : clients) {
             String localTime = LocalTime.now().format(DateTimeFormatter.ofPattern("hh:mm"));
@@ -81,7 +88,7 @@ public class ChatServer {
                 out = new PrintWriter(client.getOutputStream(), true);
                 out.println(localTime + " " + userName + " : " + msg);
                 log.log(userName + "send: " + msg);
-                lastTenMessages(localTime,userName,msg);
+                lastTenMessages(localTime, userName, msg);
             }
         }
     }
@@ -116,7 +123,6 @@ public class ChatServer {
             return false;
         }
     }
-
 
 
     public int tempAutoI() { //update later for db info

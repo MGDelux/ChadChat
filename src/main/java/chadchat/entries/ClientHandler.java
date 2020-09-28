@@ -1,7 +1,6 @@
 package chadchat.entries;
 
-import chadchat.api.InvalidPassword;
-import chadchat.api.chadchat;
+import chadchat.api.*;
 import chadchat.domain.User;
 import chadchat.ui.Protocol;
 
@@ -10,11 +9,12 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.sql.SQLException;
+import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Set;
 
 public class ClientHandler extends Thread {
-    private final chadchat.api.chadchat chadchat;
+    private final chadchat chadchat;
     private Set<User> players;
     private Socket socket;
     private ChatServer server;
@@ -72,16 +72,6 @@ public class ClientHandler extends Thread {
        out.println("Welcome "+ username);
     }
 
-    private String checkIfNewUser(String clientUsername) throws SQLException, ClassNotFoundException {
-        //  return DBServer.dbTest(clientUsername);
-        return "null";
-
-    }
-
-    public Set<User> getPlayersInLobby() { //gets players on server
-       // players = server.getActiveUsers();
-        return players;
-    }
 
     public synchronized void test(String clientUsername, String msg) throws IOException { //CHange
         server.sendMsgTest(clientUsername, msg);
