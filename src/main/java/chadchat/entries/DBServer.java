@@ -33,7 +33,7 @@ public class DBServer {
             while (rs.next()) {
                 User user = new User(
                         rs.getInt("id"),
-                        rs.getString("name"));
+                        rs.getString("name"), createdAt, salt, secret);
                 System.out.println(user);
                 if (user.getName().equals(userclientUsername)) {
                     return user.getName();
