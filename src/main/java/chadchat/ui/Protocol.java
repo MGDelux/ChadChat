@@ -46,6 +46,9 @@ public class Protocol extends Thread {
                         }
                     case "channels":
                         break;
+                    case "show":
+                        out.println("This will reprint commands");
+                        break;
                     default:
                         out.println("UNKOWN COMMAND " + cmd);
                         break;
