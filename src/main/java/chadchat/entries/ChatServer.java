@@ -14,6 +14,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class ChatServer {
+    private final chadchat chadchat;
     private final int PORT = 3400;
     private ServerSocket serverSocket;
     private final ArrayList<Socket> clients;
@@ -28,27 +29,15 @@ public class ChatServer {
 
 
     public ChatServer() {
+        chadchat = new chadchat(db);
         try {
             serverSocket = new ServerSocket(PORT);
-            InitializeDatabase();
         } catch (IOException e) {
             System.out.println(Arrays.toString(e.getStackTrace()));
         }
         clients = new ArrayList<>();
     }
 
-    private void InitializeDatabase() {
-        log.dblog("Getting info from DB");
-        try {
-            //idk if this work lol
-            allChatUsers = db.getAllUsers();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        log.dblog("All users gathered from DB");
-
-    }
 
     public void startServer() throws IOException {
         log.log("server listening on port " + PORT);

@@ -5,7 +5,6 @@ import chadchat.domain.UserExists;
 import chadchat.domain.UserRepo;
 
 public class chadchat {
-
     private final UserRepo users;
 
     public chadchat(UserRepo users) {

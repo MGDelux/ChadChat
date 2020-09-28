@@ -2,6 +2,7 @@ package chadchat.entries;
 
 import chadchat.api.*;
 import chadchat.domain.User;
+import chadchat.domain.UserExists;
 import chadchat.ui.Protocol;
 
 import java.io.IOException;
@@ -15,15 +16,14 @@ import java.util.Set;
 
 public class ClientHandler extends Thread {
     private final chadchat chadchat;
-    private Set<User> players;
+    private Set<String> players;
     private Socket socket;
     private ChatServer server;
     private Scanner in;
     private PrintWriter out;
     private String clientUsername;
-    private User newUser;
 
-    public ClientHandler(chadchat.api.chadchat chadchat, Socket client, ChatServer server) throws IOException {
+    public ClientHandler(chadchat chadchat, Socket client, ChatServer server) throws IOException {
         this.chadchat = chadchat;
         this.socket = client;
         this.server = server;
@@ -31,16 +31,10 @@ public class ClientHandler extends Thread {
         out = new PrintWriter(socket.getOutputStream(), true);
     }
 
-    public ChatServer getServer() {
-        return server;
-    }
-
     @Override
     public void run() {
         try {
             login();
-            Protocol p = new Protocol(this.newUser, in, out, this);
-            p.run();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -56,20 +50,43 @@ public class ClientHandler extends Thread {
         }
     }
 
-    public void login() {
-       out.println("Welcome to *CHADCHAT* please login:");
-       out.println("Username:");
-       String username = in.nextLine();
-       out.print("password:");
-       String password = in.nextLine();
-       try {
-           chadchat.login(username,password);
-       } catch (InvalidPassword invalidPassword) {
-           invalidPassword.printStackTrace();
-           out.println("ERROR IN LOGIN");
-           login();
-       }
-       out.println("Welcome "+ username);
+    public void login() throws UserExists { //REFACTOR
+        out.println("Welcome to *CHADCHAT* please choose:");
+        out.println("1. For existing user ");
+        out.println("2. For new user ");
+        int menuC = in.nextInt();
+        if (menuC == 1) {
+            loginUserIn();
+        } else if (menuC == 2) {
+            createNewUser();
+        }
+     //   Protocol p = new Protocol()
+
+    }
+
+    private void loginUserIn() throws UserExists {
+        in.nextLine();
+        out.println("Username:");
+        String username = in.nextLine();
+        out.println("password:");
+        String password = in.nextLine();
+        try {
+            chadchat.login(username, password);
+        } catch (InvalidPassword invalidPassword) {
+            invalidPassword.printStackTrace();
+            out.println("ERROR IN LOGIN");
+            login();
+        }
+    }
+
+
+    private void createNewUser() throws UserExists {
+        in.nextLine();
+        out.println("new username:");
+        String newUsername = in.nextLine();
+        out.println("password:");
+        String passWord = in.nextLine();
+        chadchat.createUser(newUsername, passWord);
     }
 
 
