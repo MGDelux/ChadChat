@@ -1,10 +1,8 @@
 package chadchat.infrastructure;
-
 import chadchat.domain.User;
 import chadchat.domain.UserExists;
 import chadchat.domain.UserRepo;
 import chadchat.entries.Log;
-
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.NoSuchElementException;

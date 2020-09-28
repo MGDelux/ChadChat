@@ -36,11 +36,21 @@ public class ClientHandler extends Thread {
     public void run() {
         try {
             login();
-            Protocol p = new Protocol(this.clientUsername, this.in, this.out, this,chatServer);
-            p.run();
         } catch (Exception e) {
+            out.println("ERROR IN LOGIN " + e);
             e.printStackTrace();
         }
+        try {
+        if (!clientUsername.equals(null)) {
+            chatServer.setOnlineChads(clientUsername);
+            chatServer.sendServerNotification(clientUsername+ " has joined the chat wooo!");
+            Protocol p = new Protocol(this.clientUsername, this.in, this.out, this, chatServer);
+            p.run();
+        }
+        out.println("REEEEEEEEEEEE");
+    }catch (IOException e){
+            out.println(e);
+}
     }
 
     public void outLatestChatMsgs() {
@@ -54,42 +64,54 @@ public class ClientHandler extends Thread {
     }
 
     public void login() throws UserExists { //REFACTOR
-        out.println("Welcome to *CHADCHAT* please choose:");
-        out.println("1. For existing user ");
-        out.println("2. For new user ");
-        int menuC = in.nextInt();
-        if (menuC == 1) {
-            loginUserIn();
-        } else if (menuC == 2) {
-            createNewUser();
-        }
-
+        out.println("Hello and welcome to the 4324234232334 iteration of chadchat ");
+        out.println("Are you a [n]ew users? or an [e]xisting users?");
+        loginMenu();
     }
 
-    private void loginUserIn() throws UserExists {
+    private void loginMenu() {
+        String input = in.next();
+        switch (input) {
+            case "n":
+                createNewUser();
+                break;
+            case "e":
+                userLogin();
+                break;
+            default:
+                out.println("ERROR INPUT");
+                break;
+        }
+    }
+
+    private void userLogin() {
         in.nextLine();
+        out.println("Login:");
         out.println("Username:");
-        String username = in.nextLine();
-        clientUsername = username;
-        out.println("password:");
-        String password = in.nextLine();
+        String userName = in.nextLine();
+        out.println("Password:");
+        String passWord = in.nextLine();
         try {
-            chadchat.login(username, password);
+            chadchat.login(userName,passWord);
         } catch (InvalidPassword invalidPassword) {
-            invalidPassword.printStackTrace();
-            out.println("ERROR IN LOGIN");
-            login();
+            out.println(invalidPassword);
         }
+        clientUsername = userName;
     }
 
-
-    private void createNewUser() throws UserExists {
+    private void createNewUser() {
         in.nextLine();
-        out.println("new username:");
-        String newUsername = in.nextLine();
-        out.println("password:");
+        out.println("Create new user:");
+        out.println("New Username:");
+        String userName = in.nextLine();
+        out.println("New Password:");
         String passWord = in.nextLine();
-        chadchat.createUser(newUsername, passWord);
+        try {
+            chadchat.createUser(userName,passWord);
+        } catch (UserExists userExists) {
+            out.println(userExists);
+        }
+        clientUsername = userName;
     }
 
 

@@ -3,12 +3,14 @@ package chadchat.ui;
 import chadchat.domain.UserRepo;
 import chadchat.entries.ChatServer;
 import chadchat.entries.ClientHandler;
+import chadchat.entries.Log;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Scanner;
 
 public class Protocol extends Thread {
+    Log log = new Log();
     private final String user;
     private final Scanner in;
     private final PrintWriter out;
@@ -32,39 +34,55 @@ public class Protocol extends Thread {
 
     @Override
     public void run() {
-        try {
-            out.println(welcomeMessage());
-            clientHandler.outLatestChatMsgs();
-            String cmd = getInput();
-            switch (cmd) {
-                case "h":
-                    out.println(helpMessage());
-                    break;
-                case "chat":
-                    if (inChannel) {
-                        while (true) {
-                            out.print(">");
-                            String a_msg = in.nextLine();
-                        }
-                    } else {
-                        out.println("not in channel");
+        log.log(this.user + this.in + this.out + this.clientHandler + this.chatServer);
+        out.println(welcomeMessage());
+        out.println(chatServer.onlineChads);
+        clientHandler.outLatestChatMsgs();
+            try {
+                String cmd = getInput();
+                while (!cmd.equals("quit")) {
+                switch (cmd) {
+                    case "h":
+                        out.println(helpMessage());
                         break;
-                    }
-
-                case "channels":
-                    break;
-                case "show":
-                    out.println("This will reprint commands");
-                    break;
-                default:
-                    out.println("UNKOWN COMMAND " + cmd);
-                    break;
+                    case "chat":
+                        if (inChannel) {
+                            out.println("join chat #");
+                            while (true) {
+                                out.print(">");
+                                String a_msg = in.nextLine();
+                                chatServer.sendMsgTest(this.user, a_msg);
+                            }
+                        } else {
+                            out.println("not in channel");
+                            break;
+                        }
+                    case "channels":
+                        inChannel = true;
+                        out.println("in channel");
+                        break;
+                    case "show":
+                        out.println("This will reprint commands");
+                        break;
+                    default:
+                        out.println("UNKOWN COMMAND " + cmd);
+                        break;
+                }
+                out.flush();
+                cmd = getInput();
             }
-            out.flush();
-            cmd = getInput();
         }catch (Exception e){
-            e.printStackTrace();
-        }
+                chatServer.removeInactiveUser(user);
+                try {
+                    chatServer.sendServerNotification(user+ " has left");
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
+                log.log("USER DISCONNECTED CLOSING CONNECTION : " + Thread.currentThread() + " - "+ this.clientHandler.getName());
+                out.close();
+                in.close();
+                out.println(e);
+            }
     }
 
     private String welcomeMessage(){

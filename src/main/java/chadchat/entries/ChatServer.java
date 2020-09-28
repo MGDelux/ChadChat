@@ -19,8 +19,7 @@ public class ChatServer {
     private ServerSocket serverSocket;
     private final ArrayList<Socket> clients;
     public final String serverLabel = "[SERVER]";
-    public Set<User> activeUsers = new HashSet<>();
-    Iterable<User> allChatUsers;
+    public Set<String> onlineChads = new HashSet<>();
     public ArrayList<String> latestChatMsg = new ArrayList<>();
     Log log = new Log();
     Database db = new Database();
@@ -61,13 +60,7 @@ public class ChatServer {
         }
     }
 
-    public Set<User> offlineUsers() {
-        Set<User> tempUserSet = new HashSet<>();
-        for (User u : allChatUsers) {
-            tempUserSet.add(u);
-        }
-        return tempUserSet;
-    }
+
 
     public synchronized void sendMsgTest(String userName, String msg) throws IOException {
         for (Socket client : clients) {
@@ -75,7 +68,7 @@ public class ChatServer {
             if (!client.isClosed() || userName.isEmpty()) {
                 out = new PrintWriter(client.getOutputStream(), true);
                 out.println(localTime + " " + userName + " : " + msg);
-                log.log(userName + "send: " + msg);
+                log.log(userName + " said: " + msg);
                 lastTenMessages(localTime, userName, msg);
             }
         }
@@ -93,31 +86,32 @@ public class ChatServer {
         new ChatServer().startServer();
     }
 
-    public void setActiveUsers(User user) {
-        if (activeUsers.contains(user)) {
+    public void setOnlineChads(String user) {
+        if (onlineChads.contains(user)) {
             log.log("User already in chat server");
         } else {
-            activeUsers.add(user);
+            onlineChads.add(user);
             log.log("User ADDED  chat server");
         }
     }
 
     public boolean removeInactiveUser(String userName) {
-        if (activeUsers.contains(userName)) {
-            activeUsers.remove(userName);
+        if (onlineChads.contains(userName)) {
+            onlineChads.remove(userName);
             log.log("removed: " + userName);
             return true;
         } else {
+            log.log("cannot find in online users"+userName);
             return false;
         }
     }
 
 
     public int tempAutoI() { //update later for db info
-        if (activeUsers.size() == 0) {
+        if (onlineChads.size() == 0) {
             return 1;
         } else {
-            return activeUsers.size();
+            return onlineChads.size();
         }
     }
 

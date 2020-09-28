@@ -14,6 +14,9 @@ public class chadchat {
     public Iterable<User> findAllUsers() {
         return users.findAllUsers();
     }
+    public User checkUser(String user){
+        return users.findUser(user);
+    }
 
     public User createUser(String name, String password) throws UserExists {
         byte[] salt = User.genereateSalt();
