@@ -67,7 +67,7 @@ public class Protocol extends Thread {
 
     private String welcomeMessage(){
         return "Welcome " + user.getName()
-                + "\nPlease select a chat or pick a channel by typing the name or type help for more info";
+                + "\nPlease select chat or pick a channel by typing the name or type help for more info";
     }
 
     private String helpMessage(){

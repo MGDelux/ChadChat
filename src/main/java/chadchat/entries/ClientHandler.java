@@ -68,7 +68,7 @@ public class ClientHandler extends Thread {
         }
         out.println("Welcome user " + clientUsername);
         System.out.println("[SERVER] Adding user " + clientUsername);
-        newUser = new User(server.tempAutoI(), clientUsername);
+        newUser = new User(server.tempAutoI(), clientUsername, createdAt, salt, secret);
         server.setActiveUsers(newUser);
         out.println("ONLINE USERS: " + server.activeUsers.toString()); //fix lol
         server.sendServerNotification(clientUsername + " Has joined the chat");
