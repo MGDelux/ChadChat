@@ -24,7 +24,6 @@ public class ChatServer {
     public ArrayList<String> latestChatMsg = new ArrayList<>();
     Log log = new Log();
     Database db = new Database();
-
     PrintWriter out;
 
 
@@ -46,7 +45,7 @@ public class ChatServer {
             clients.add(client);
             log.log("client count: " + clients.size());
             chadchat chat = new chadchat((UserRepo) db);
-            ClientHandler clientHandler = new ClientHandler(chat, client, this);
+            ClientHandler clientHandler = new ClientHandler(this, chat, client, this);
             Thread t = new Thread(clientHandler);
             t.start();
         }

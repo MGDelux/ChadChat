@@ -15,15 +15,16 @@ import java.util.Scanner;
 import java.util.Set;
 
 public class ClientHandler extends Thread {
+    private final ChatServer chatServer;
     private final chadchat chadchat;
-    private Set<String> players;
     private Socket socket;
     private ChatServer server;
     private Scanner in;
     private PrintWriter out;
-    private String clientUsername;
+    private String clientUsername; //temp
 
-    public ClientHandler(chadchat chadchat, Socket client, ChatServer server) throws IOException {
+    public ClientHandler(ChatServer chatServer, chadchat chadchat, Socket client, ChatServer server) throws IOException {
+        this.chatServer = chatServer;
         this.chadchat = chadchat;
         this.socket = client;
         this.server = server;
@@ -35,6 +36,8 @@ public class ClientHandler extends Thread {
     public void run() {
         try {
             login();
+            Protocol p = new Protocol(this.clientUsername, this.in, this.out, this,chatServer);
+            p.run();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -60,7 +63,6 @@ public class ClientHandler extends Thread {
         } else if (menuC == 2) {
             createNewUser();
         }
-     //   Protocol p = new Protocol()
 
     }
 
@@ -68,6 +70,7 @@ public class ClientHandler extends Thread {
         in.nextLine();
         out.println("Username:");
         String username = in.nextLine();
+        clientUsername = username;
         out.println("password:");
         String password = in.nextLine();
         try {
