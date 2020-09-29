@@ -1,6 +1,5 @@
 package chadchat.ui;
 
-import chadchat.domain.UserRepo;
 import chadchat.entries.ChatServer;
 import chadchat.entries.ClientHandler;
 import chadchat.entries.Log;
@@ -60,6 +59,8 @@ public class Protocol extends Thread {
                     case "channels":
                         inChannel = true;
                         out.println("in channel");
+                        out.println(chatServer.channel.toString());
+
                         break;
                     case "show":
                         out.println("This will reprint commands");

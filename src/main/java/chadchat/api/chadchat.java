@@ -1,20 +1,23 @@
 package chadchat.api;
 
-import chadchat.domain.User;
-import chadchat.domain.UserExists;
-import chadchat.domain.UserRepo;
+import chadchat.domain.*;
+
+import java.util.ArrayList;
 
 public class chadchat {
     private final UserRepo users;
+    private final ChannelRepo channels;
 
-    public chadchat(UserRepo users) {
+    public chadchat(UserRepo users, ChannelRepo channels) {
         this.users = users;
+        this.channels = channels;
     }
 
     public Iterable<User> findAllUsers() {
         return users.findAllUsers();
     }
-    public User checkUser(String user){
+
+    public User checkUser(String user) {
         return users.findUser(user);
     }
 
@@ -31,5 +34,18 @@ public class chadchat {
         } else {
             throw new InvalidPassword();
         }
+    }
+
+    public Channel createChannel(String name, ArrayList<String> users) {
+        int tId = Channel.generateId();
+        return channels.createChannel(tId, name, users);
+    }
+
+    public Channel checkChannel(int id) {
+        return channels.getChannel(id);
+    }
+
+    public Iterable<Channel> getAllChannels() {
+        return channels.getAllChannels();
     }
 }

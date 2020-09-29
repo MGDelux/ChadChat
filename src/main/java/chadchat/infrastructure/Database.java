@@ -1,13 +1,13 @@
 package chadchat.infrastructure;
-import chadchat.domain.User;
-import chadchat.domain.UserExists;
-import chadchat.domain.UserRepo;
+
+import chadchat.domain.*;
 import chadchat.entries.Log;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.NoSuchElementException;
 
-public class Database implements UserRepo {
+public class Database implements UserRepo, ChannelRepo {
     static Log log = new Log();
     private static final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
     private static final String DB_URL = "jdbc:mysql://localhost/chadchat";
@@ -15,7 +15,7 @@ public class Database implements UserRepo {
     private static final int version = 2;
 
     public Database() {
-        int getTempVer =getCurrentVersion();
+        int getTempVer = getCurrentVersion();
         if (getTempVer != getVersion()) {
             log.dblog("Database in wrong state, expected: "
                     + getVersion() + ", got: " + getCurrentVersion());
@@ -61,9 +61,17 @@ public class Database implements UserRepo {
                 rs.getBytes("users.secret"));
     }
 
+    private Channel loadChannels(ResultSet rs) throws SQLException {
+        ArrayList<String> test = new ArrayList<>(); //temp fix update base to support users lol
+        log.dblog("Loading channels");
+        return new Channel(
+                rs.getInt("channels.id"),
+                rs.getString("channels.ChannelName"), test);
+    }
+
 
     public User createUser(String name, byte[] PJsalt, byte[] secret) throws UserExists {
-        log.dblog("Creating user " + name +"\n " + PJsalt + " , "+ secret);
+        log.dblog("Creating user " + name + "\n " + PJsalt + " , " + secret);
         int tempId;
         try (Connection conn = getConnection()) {
             var ps = conn.prepareStatement("INSERT INTO users (name, salt, secret)" + "VALUE (?,?,?);", Statement.RETURN_GENERATED_KEYS);
@@ -74,14 +82,14 @@ public class Database implements UserRepo {
                 ps.execute();
 
             } catch (SQLIntegrityConstraintViolationException e) {
-                log.dblog("User exists : "+name);
+                log.dblog("User exists : " + name);
                 throw new UserExists(name);
             }
             ResultSet rs = ps.getGeneratedKeys();
             if (rs.next()) {
                 tempId = rs.getInt(1);
             } else {
-                log.dblog("User exists : "+name);
+                log.dblog("User exists : " + name);
                 throw new UserExists(name);
             }
 
@@ -93,13 +101,14 @@ public class Database implements UserRepo {
 
         return findUser(tempId);
     }
+
     public User findUser(int id) throws NoSuchElementException {
         return withConnection(conn -> {
             PreparedStatement s = conn.prepareStatement(
                     "SELECT * FROM users WHERE id = ?;");
             s.setInt(1, id);
             ResultSet rs = s.executeQuery();
-            if(rs.next()) {
+            if (rs.next()) {
                 return loadUser(rs);
             } else {
                 log.dblog("No version in properties.");
@@ -144,6 +153,41 @@ public class Database implements UserRepo {
             }
             return tempUsers;
         });
+    }
+
+    @Override
+    public Channel getChannel(int id) {
+        return withConnection(conn -> {
+            PreparedStatement s = conn.prepareStatement("SELECT * FROM channels WHERE id = ?;");
+            s.setInt(1, id);
+            ResultSet resultSet = s.executeQuery();
+            if (resultSet.next()) {
+                return loadChannels(resultSet);
+            } else {
+                log.dblog("no version in propertis");
+                throw new NoSuchElementException("No chmannel with id: " + id);
+
+            }
+
+        });
+    }
+
+    @Override
+    public Iterable<Channel> getAllChannels() {
+        return withConnection(conn -> {
+            PreparedStatement ps = conn.prepareStatement("SELECT * FROM channels;");
+            ResultSet get = ps.executeQuery();
+            ArrayList<Channel> tempChannels = new ArrayList<>();
+            while (get.next()) {
+                tempChannels.add(loadChannels(get));
+            }
+            return tempChannels;
+        });
+    }
+
+    @Override
+    public Channel createChannel(int channelID, String channelName, ArrayList<String> users) {
+        return null;
     }
 
     interface ConnectionHandler<T, E extends Throwable> {

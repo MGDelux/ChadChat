@@ -1,7 +1,7 @@
 package chadchat.entries;
 
 import chadchat.api.chadchat;
-import chadchat.domain.User;
+import chadchat.domain.Channel;
 import chadchat.domain.UserRepo;
 import chadchat.infrastructure.Database;
 
@@ -14,6 +14,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class ChatServer {
+     public Channel channel;
     private final chadchat chadchat;
     private final int PORT = 3400;
     private ServerSocket serverSocket;
@@ -27,7 +28,7 @@ public class ChatServer {
 
 
     public ChatServer() {
-        chadchat = new chadchat(db);
+        chadchat = new chadchat(db, db);
         try {
             serverSocket = new ServerSocket(PORT);
         } catch (IOException e) {
@@ -37,16 +38,19 @@ public class ChatServer {
     }
 
 
+
+
     public void startServer() throws IOException {
         log.log("server listening on port " + PORT);
         while (true) {
             Socket client = serverSocket.accept();
             clients.add(client);
             log.log("client count: " + clients.size());
-            chadchat chat = new chadchat((UserRepo) db);
+            chadchat chat = new chadchat((UserRepo) db, db);
             ClientHandler clientHandler = new ClientHandler(this, chat, client, this);
             Thread t = new Thread(clientHandler);
             t.start();
+
         }
 
     }
