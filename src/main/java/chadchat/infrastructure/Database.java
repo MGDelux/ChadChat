@@ -38,7 +38,7 @@ public class Database implements UserRepo, ChannelRepo {
                 return -1;
             }
         } catch (SQLException e) {
-            System.err.println(e.getMessage());
+            log.dblog(e.getMessage());
             return -1;
         }
     }
@@ -66,7 +66,7 @@ public class Database implements UserRepo, ChannelRepo {
         log.dblog("Loading channels");
         return new Channel(
                 rs.getInt("channels.id"),
-                rs.getString("channels.ChannelName"), test);
+                rs.getString("channels.ChannelName"));
     }
 
 

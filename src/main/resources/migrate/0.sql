@@ -1,3 +1,5 @@
+USE ChadChat;
+
 DROP TABLE IF EXISTS properties;
 CREATE TABLE properties (
     name VARCHAR(255) PRIMARY KEY,

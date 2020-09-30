@@ -14,7 +14,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class ChatServer {
-     public Channel channel;
+    public Channel channel;
     private final chadchat chadchat;
     private final int PORT = 3400;
     private ServerSocket serverSocket;
@@ -36,8 +36,6 @@ public class ChatServer {
         }
         clients = new ArrayList<>();
     }
-
-
 
 
     public void startServer() throws IOException {
@@ -63,7 +61,6 @@ public class ChatServer {
             }
         }
     }
-
 
 
     public synchronized void sendMsgTest(String userName, String msg) throws IOException {
@@ -99,17 +96,23 @@ public class ChatServer {
         }
     }
 
+    public void showOnlineChads(Set<String> onlineChads) {
+        out.println("Online Chad's\n");
+        for (String onlineChad : onlineChads) {
+            out.println(onlineChad);
+        }
+    }
+
     public boolean removeInactiveUser(String userName) {
         if (onlineChads.contains(userName)) {
             onlineChads.remove(userName);
             log.log("removed: " + userName);
             return true;
         } else {
-            log.log("cannot find in online users"+userName);
+            log.log("cannot find in online users" + userName);
             return false;
         }
     }
-
 
     public int tempAutoI() { //update later for db info
         if (onlineChads.size() == 0) {

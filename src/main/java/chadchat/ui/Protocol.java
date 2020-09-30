@@ -1,5 +1,6 @@
 package chadchat.ui;
 
+import chadchat.domain.Channel;
 import chadchat.entries.ChatServer;
 import chadchat.entries.ClientHandler;
 import chadchat.entries.Log;
@@ -25,7 +26,6 @@ public class Protocol extends Thread {
         this.chatServer = chatServer;
     }
 
-
     private String getInput() {
         out.print("> ");
         return in.nextLine();
@@ -35,7 +35,7 @@ public class Protocol extends Thread {
     public void run() {
         log.log(this.user + this.in + this.out + this.clientHandler + this.chatServer);
         out.println(welcomeMessage());
-        out.println(chatServer.onlineChads);
+        chatServer.showOnlineChads(chatServer.onlineChads);
         clientHandler.outLatestChatMsgs();
             try {
                 String cmd = getInput();
@@ -59,12 +59,16 @@ public class Protocol extends Thread {
                     case "channels":
                         inChannel = true;
                         out.println("in channel");
-                        out.println(chatServer.channel.toString());
-
                         break;
                     case "show":
                         out.println("This will reprint commands");
                         break;
+                    case "create" :
+                        if (!inChannel){
+                            out.println("You're creating a channel, give it a name");
+                            String channelName = in.nextLine();
+                            Channel tmpChannel = new Channel(Channel.generateId(), channelName);
+                        }
                     default:
                         out.println("UNKOWN COMMAND " + cmd);
                         break;
@@ -92,7 +96,8 @@ public class Protocol extends Thread {
     }
 
     private String helpMessage(){
-        return "This is a help message!";
+        return "\nType channels then press return"
+                + "\nType chat then press return";
     }
 
     /*

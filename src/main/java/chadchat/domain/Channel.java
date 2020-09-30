@@ -9,10 +9,9 @@ public class Channel {
     private final String channelName;
     public ArrayList<String> users;
 
-    public Channel(int channelID, String channelName, ArrayList<String> users) {
+    public Channel(int channelID, String channelName) {
         this.channelID = channelID;
         this.channelName = channelName;
-        this.users = users;
     }
 
     public int getChannelID() {

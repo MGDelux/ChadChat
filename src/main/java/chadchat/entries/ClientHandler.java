@@ -115,7 +115,7 @@ public class ClientHandler extends Thread {
     }
 
 
-    public synchronized void test(String clientUsername, String msg) throws IOException { //CHange
+    public void test(String clientUsername, String msg) throws IOException { //CHange
         server.sendMsgTest(clientUsername, msg);
     }
 }
