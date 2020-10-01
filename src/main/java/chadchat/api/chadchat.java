@@ -17,8 +17,18 @@ public class chadchat {
         return users.findAllUsers();
     }
 
-    public User checkUser(String user) {
-        return users.findUser(user);
+    /**
+     *
+     * @param user
+     * @return true if user exists
+     */
+    public boolean checkUser(String user) {
+        try {
+            users.findUser(user);
+            return true;
+        } catch (UserNotFound userNotFound) {
+            return false;
+        }
     }
 
     public User createUser(String name, String password) throws UserExists {
@@ -27,7 +37,7 @@ public class chadchat {
         return users.createUser(name, salt, secret);
     }
 
-    public User login(String username, String password) throws InvalidPassword {
+    public User login(String username, String password) throws InvalidPassword, UserNotFound {
         User user = users.findUser(username);
         if (user.isPasswordCorrect(password)) {
             return user;

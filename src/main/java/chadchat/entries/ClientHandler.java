@@ -1,7 +1,6 @@
 package chadchat.entries;
 
 import chadchat.api.*;
-import chadchat.domain.User;
 import chadchat.domain.UserExists;
 import chadchat.ui.Protocol;
 
@@ -9,10 +8,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.sql.SQLException;
-import java.util.HashSet;
 import java.util.Scanner;
-import java.util.Set;
 
 public class ClientHandler extends Thread {
     private final ChatServer chatServer;
@@ -21,7 +17,10 @@ public class ClientHandler extends Thread {
     private ChatServer server;
     private Scanner in;
     private PrintWriter out;
-    private String clientUsername; //temp
+    private String clientUsername = "null"; //temp
+    private boolean loggedIn = false;
+    private String name;
+    private String password;
 
     public ClientHandler(ChatServer chatServer, chadchat chadchat, Socket client, ChatServer server) throws IOException {
         this.chatServer = chatServer;
@@ -34,23 +33,104 @@ public class ClientHandler extends Thread {
 
     @Override
     public void run() {
+        out.println(motd());
         try {
-            login();
-        } catch (Exception e) {
-            out.println("ERROR IN LOGIN " + e);
-            e.printStackTrace();
+            try {
+                clientMenu();
+            } catch (UserExists userExists) {
+                userExists.printStackTrace();
+            }
+        } catch (IOException e) {
+            out.println(e);
         }
-        try {
-        if (!clientUsername.equals(null)) {
-            chatServer.setOnlineChads(clientUsername);
-            chatServer.sendServerNotification(clientUsername+ " has joined the chat wooo!");
-            Protocol p = new Protocol(this.clientUsername, this.in, this.out, this, chatServer);
+
+    }
+
+    private String getInput() {
+        out.print("> ");
+        return in.nextLine();
+    }
+
+    private void clientMenu() throws UserExists, IOException {
+        if (!this.socket.isClosed()){
+            try {
+
+                out.println();
+                out.println("Menu:");
+                out.println("[E] For existing user ");
+                out.println("[N] For new user ");
+                out.println("[H] For more information ");
+                printMenu();
+            } catch (IOException e){
+                e.printStackTrace();
+            }
+        } else if (this.socket.isClosed()){
+            in.close();
+            out.close();
+        }
+    }
+
+    private void printMenu() throws UserExists {
+        if (!loggedIn) {
+            try {
+                String cmd = getInput();
+                while (!cmd.toLowerCase().equals("quit")) {
+                    switch (cmd.toLowerCase()) {
+                        case "h":
+                            printHelp();
+                            printMenu();
+                            break;
+                        case "e":
+                            clientLogin();
+                            break;
+                        case "n":
+                            createUser();
+                            break;
+                        default:
+                            out.println("Error in your input: " + cmd);
+                            printMenu();
+                            break;
+                    }
+                }
+            } catch (Exception e) {
+                out.println(e);
+            }
+        } else if (loggedIn) {
+            Protocol p = new Protocol(name, this.in, this.out, this, this.chatServer);
             p.run();
         }
-        out.println("REEEEEEEEEEEE");
-    }catch (IOException e){
-            out.println(e);
-}
+        clientMenu();
+    }
+
+
+    private void createUser() throws UserExists {
+        out.println("Please enter your username: ");
+        name = in.nextLine();
+        out.println("Please pick your password: ");
+        password = in.nextLine();
+        if (chadchat.checkUser(name)) {
+            throw new UserExists(name);
+        } else {
+            chadchat.createUser(name, password);
+            loggedIn = true;
+        }
+        if (loggedIn = false){
+            printMenu();
+        }
+        printMenu();
+    }
+
+    private void clientLogin() throws UserExists {
+
+    }
+
+    private void printHelp() {
+        out.println("Type either N,H,E for the options above and then enter.");
+        out.println("Input:");
+    }
+
+    private String motd() {
+        return "Welcome to Chadchat the one stop chat client for chads";
     }
 
     public void outLatestChatMsgs() {
@@ -63,59 +143,4 @@ public class ClientHandler extends Thread {
         }
     }
 
-    public void login() throws UserExists { //REFACTOR
-        out.println("Hello and welcome to the 4324234232334 iteration of chadchat ");
-        out.println("Are you a [n]ew users? or an [e]xisting users?");
-        loginMenu();
-    }
-
-    private void loginMenu() {
-        String input = in.next();
-        switch (input) {
-            case "n":
-                createNewUser();
-                break;
-            case "e":
-                userLogin();
-                break;
-            default:
-                out.println("ERROR INPUT");
-                break;
-        }
-    }
-
-    private void userLogin() {
-        in.nextLine();
-        out.println("Login:");
-        out.println("Username:");
-        String userName = in.nextLine();
-        out.println("Password:");
-        String passWord = in.nextLine();
-        try {
-            chadchat.login(userName,passWord);
-        } catch (InvalidPassword invalidPassword) {
-            out.println(invalidPassword);
-        }
-        clientUsername = userName;
-    }
-
-    private void createNewUser() {
-        in.nextLine();
-        out.println("Create new user:");
-        out.println("New Username:");
-        String userName = in.nextLine();
-        out.println("New Password:");
-        String passWord = in.nextLine();
-        try {
-            chadchat.createUser(userName,passWord);
-        } catch (UserExists userExists) {
-            out.println(userExists);
-        }
-        clientUsername = userName;
-    }
-
-
-    public void test(String clientUsername, String msg) throws IOException { //CHange
-        server.sendMsgTest(clientUsername, msg);
-    }
 }

@@ -126,7 +126,7 @@ public class Database implements UserRepo, ChannelRepo {
     }
 
     @Override
-    public User findUser(String name) {
+    public User findUser(String name) throws UserNotFound {
         return withConnection(conn -> {
             PreparedStatement s = conn.prepareStatement(
                     "SELECT * FROM users WHERE name = ?;");
@@ -136,7 +136,7 @@ public class Database implements UserRepo, ChannelRepo {
                 return loadUser(rs);
             } else {
                 log.dblog("No version in properties.");
-                throw new NoSuchElementException("No user with id: " + name);
+                throw new UserNotFound(name);
             }
         });
     }

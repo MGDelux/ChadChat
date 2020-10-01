@@ -79,4 +79,36 @@ public class User {
         }
         return sb.toString();
     }
+
+    public static int getPasswordItterations() {
+        return PASSWORD_ITTERATIONS;
+    }
+
+    public static int getPasswordLength() {
+        return PASSWORD_LENGTH;
+    }
+
+    public static SecretKeyFactory getPasswordFactory() {
+        return PASSWORD_FACTORY;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public byte[] getSalt() {
+        return salt;
+    }
+
+    public byte[] getSecret() {
+        return secret;
+    }
 }
