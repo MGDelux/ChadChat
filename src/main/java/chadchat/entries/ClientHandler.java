@@ -142,5 +142,5 @@ public class ClientHandler extends Thread {
             e.printStackTrace();
         }
     }
-
+    //TODO: We need an update
 }
