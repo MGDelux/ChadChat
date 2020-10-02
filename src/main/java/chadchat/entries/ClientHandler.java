@@ -122,6 +122,7 @@ public class ClientHandler extends Thread {
         if (loggedIn = false) {
             printMenu();
         }
+        clientLogin();
     }
 
     private void clientLogin() throws UserExists, IOException {
