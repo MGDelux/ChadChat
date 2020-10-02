@@ -1,7 +1,6 @@
 package chadchat.entries;
 
 import chadchat.api.chadchat;
-import chadchat.domain.Channel;
 import chadchat.domain.UserRepo;
 import chadchat.infrastructure.Database;
 
@@ -14,7 +13,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class ChatServer {
-    public Channel channel;
     private final chadchat chadchat;
     private final int PORT = 3400;
     private ServerSocket serverSocket;
@@ -44,7 +42,7 @@ public class ChatServer {
             Socket client = serverSocket.accept();
             clients.add(client);
             log.log("client count: " + clients.size());
-            chadchat chat = new chadchat((UserRepo) db, db);
+            chadchat chat = new chadchat(db, db);
             ClientHandler clientHandler = new ClientHandler(this, chat, client, this);
             Thread t = new Thread(clientHandler);
             t.start();
@@ -55,7 +53,7 @@ public class ChatServer {
 
     public synchronized void sendServerNotification(String msg) throws IOException {
         for (Socket client : clients) {
-            if (!client.isClosed()) {
+            if (!client.isClosed() && client.isConnected()) {
                 out = new PrintWriter(client.getOutputStream(), true);
                 out.println(serverLabel + " : " + msg);
             }
@@ -67,11 +65,31 @@ public class ChatServer {
         for (Socket client : clients) {
             String localTime = LocalTime.now().format(DateTimeFormatter.ofPattern("hh:mm"));
             if (!client.isClosed() || userName.isEmpty()) {
-                out = new PrintWriter(client.getOutputStream(), true);
-                out.println(localTime + " " + userName + " : " + msg);
-                log.log(userName + " said: " + msg);
-                lastTenMessages(localTime, userName, msg);
+                if (!checkIfCommand(msg)) {
+                    out = new PrintWriter(client.getOutputStream(), true);
+                    out.println(localTime + " " + userName + " : " + msg);
+                    log.log(userName + " said: " + msg);
+                    lastTenMessages(localTime, userName, msg);
+                } else {
+                    out.println(localTime + " " + userName + " used the command : " + msg);
+                    lastTenMessages(localTime, userName, msg);
+                }
             }
+        }
+    }
+
+    public boolean checkIfCommand(String msg) {
+        try {
+            String[] spilt = msg.split("!");
+            String commad = spilt[spilt.length - 1];
+            if (msg.startsWith("!")) {
+                log.log("COMMAND: " + commad);
+                if (commad.toLowerCase().equals("quit"));
+                return true;
+
+            } else return false;
+        } catch (ArrayIndexOutOfBoundsException e) {
+            return false;
         }
     }
 
@@ -96,13 +114,6 @@ public class ChatServer {
         }
     }
 
-    public void showOnlineChads(Set<String> onlineChads) {
-        out.println("Online Chad's\n");
-        for (String onlineChad : onlineChads) {
-            out.println(onlineChad);
-        }
-    }
-
     public boolean removeInactiveUser(String userName) {
         if (onlineChads.contains(userName)) {
             onlineChads.remove(userName);
@@ -114,12 +125,8 @@ public class ChatServer {
         }
     }
 
-    public int tempAutoI() { //update later for db info
-        if (onlineChads.size() == 0) {
-            return 1;
-        } else {
-            return onlineChads.size();
-        }
-    }
 
+    public Set<String> getOnlineChads() {
+        return onlineChads;
+    }
 }
