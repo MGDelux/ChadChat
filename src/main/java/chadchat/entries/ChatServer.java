@@ -26,7 +26,7 @@ public class ChatServer {
 
 
     public ChatServer() {
-        chadchat = new chadchat(db, db);
+        chadchat = new chadchat(db);
         try {
             serverSocket = new ServerSocket(PORT);
         } catch (IOException e) {
@@ -42,7 +42,7 @@ public class ChatServer {
             Socket client = serverSocket.accept();
             clients.add(client);
             log.log("client count: " + clients.size());
-            chadchat chat = new chadchat(db, db);
+            chadchat chat = new chadchat(db);
             ClientHandler clientHandler = new ClientHandler(this, chat, client, this);
             Thread t = new Thread(clientHandler);
             t.start();

@@ -1,6 +1,5 @@
 package chadchat.ui;
 
-import chadchat.domain.Channel;
 import chadchat.entries.ChatServer;
 import chadchat.entries.ClientHandler;
 import chadchat.entries.Log;
@@ -16,7 +15,6 @@ public class Protocol extends Thread {
     private final PrintWriter out;
     private final ClientHandler clientHandler;
     private final ChatServer chatServer;
-    public boolean inChannel = false;
     private boolean inChat = false;
 
     public Protocol(String user, Scanner in, PrintWriter out, ClientHandler clientH, ChatServer chatServer) {
@@ -46,38 +44,24 @@ public class Protocol extends Thread {
                         out.println(helpMessage());
                         break;
                     case "chat":
-                        if (inChannel) {
-                            inChat = true;
-                            out.println("join chat #");
-                            String a_msg;
-                            while (inChat) {
-                                out.print(">");
-                                a_msg = in.nextLine();
-                                if (!chatServer.checkIfCommand(a_msg)) {
-                                    chatServer.sendMsgTest(this.user, a_msg);
-                                } else {
-                                    inChat = false;
-                                    log.log("user left the chat");
-                                    chatServer.sendServerNotification(user + " left the chat ");
-                                }
+                        inChat = true;
+                        out.println("join chat #");
+                        String a_msg;
+                        while (inChat) {
+                            out.print(">");
+                            a_msg = in.nextLine();
+                            if (!chatServer.checkIfCommand(a_msg)) {
+                                chatServer.sendMsgTest(this.user, a_msg);
+                            } else {
+                                inChat = false;
+                                log.log("user left the chat");
+                                chatServer.sendServerNotification(user + " left the chat ");
                             }
-                        } else {
-                            out.println("not in channel");
-                            break;
+
                         }
-                    case "channels":
-                        inChannel = true;
-                        out.println("in channel");
-                        break;
                     case "show":
                         out.println("This will reprint commands");
                         break;
-                    case "create":
-                        if (!inChannel) {
-                            out.println("You're creating a channel, give it a name");
-                            String channelName = in.nextLine();
-                            Channel tmpChannel = new Channel(Channel.generateId(), channelName);
-                        }
                     default:
                         out.println("UNKOWN COMMAND " + cmd);
                         break;
@@ -108,12 +92,6 @@ public class Protocol extends Thread {
         return "\nType channels then press return"
                 + "\nType chat then press return";
     }
-
-    /*
-    private String channelMessage(){
-        return "You've joined " + channel.getName();
-    }
-     */
 
 }
 

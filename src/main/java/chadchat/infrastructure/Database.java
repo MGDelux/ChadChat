@@ -7,7 +7,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.NoSuchElementException;
 
-public class Database implements UserRepo, ChannelRepo {
+public class Database implements UserRepo {
     static Log log = new Log();
     private static final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
     private static final String DB_URL = "jdbc:mysql://localhost/chadchat";
@@ -60,16 +60,6 @@ public class Database implements UserRepo, ChannelRepo {
                 rs.getBytes("users.salt"),
                 rs.getBytes("users.secret"));
     }
-
-    private Channel loadChannels(ResultSet rs) throws SQLException {
-        ArrayList<String> test = new ArrayList<>(); //temp fix update base to support users lol
-        log.dblog("Loading channels");
-        return new Channel(
-                rs.getInt("channels.id"),
-                rs.getString("channels.ChannelName"));
-    }
-
-
     public User createUser(String name, byte[] PJsalt, byte[] secret) throws UserExists {
         log.dblog("Creating user " + name + "\n " + PJsalt + " , " + secret);
         int tempId;
@@ -153,41 +143,6 @@ public class Database implements UserRepo, ChannelRepo {
             }
             return tempUsers;
         });
-    }
-
-    @Override
-    public Channel getChannel(int id) {
-        return withConnection(conn -> {
-            PreparedStatement s = conn.prepareStatement("SELECT * FROM channels WHERE id = ?;");
-            s.setInt(1, id);
-            ResultSet resultSet = s.executeQuery();
-            if (resultSet.next()) {
-                return loadChannels(resultSet);
-            } else {
-                log.dblog("no version in propertis");
-                throw new NoSuchElementException("No chmannel with id: " + id);
-
-            }
-
-        });
-    }
-
-    @Override
-    public Iterable<Channel> getAllChannels() {
-        return withConnection(conn -> {
-            PreparedStatement ps = conn.prepareStatement("SELECT * FROM channels;");
-            ResultSet get = ps.executeQuery();
-            ArrayList<Channel> tempChannels = new ArrayList<>();
-            while (get.next()) {
-                tempChannels.add(loadChannels(get));
-            }
-            return tempChannels;
-        });
-    }
-
-    @Override
-    public Channel createChannel(int channelID, String channelName, ArrayList<String> users) {
-        return null;
     }
 
     interface ConnectionHandler<T, E extends Throwable> {
